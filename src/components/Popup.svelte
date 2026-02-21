@@ -1,16 +1,25 @@
-<!-- ConfirmPopup.svelte -->
 <script lang="ts">
     export let message: string = "Are you sure?";
     export let onConfirm: () => void;
     export let onCancel: () => void;
+    export let ldm = false;
 </script>
 
-<div class="popup-backdrop" role="button" tabindex="0" onclick={onCancel} onkeydown={(e) => e.key === 'Escape' && onCancel()}>
-    <div class="popup-card">
+<div
+    class="popup-backdrop"
+    class:ldm
+    role="button"
+    tabindex="0"
+    onclick={onCancel}
+    onkeydown={(e) => e.key === "Escape" && onCancel()}
+>
+    <div class="popup-card" class:ldm>
         <p class="popup-message">{message}</p>
         <div class="popup-buttons">
-            <button class="popup-btn cancel" onclick={onCancel}>Cancel</button>
-            <button class="popup-btn confirm" onclick={onConfirm}
+            <button class="popup-btn cancel" class:ldm onclick={onCancel}
+                >Cancel</button
+            >
+            <button class="popup-btn confirm" class:ldm onclick={onConfirm}
                 >Confirm</button
             >
         </div>
@@ -29,6 +38,12 @@
         z-index: 1000;
     }
 
+    .popup-backdrop.ldm {
+        backdrop-filter: none;
+        background-color: #111;
+    }
+
+    /* Card */
     .popup-card {
         position: relative;
         background-color: rgba(0, 0, 0, 0.25);
@@ -43,6 +58,13 @@
         flex-direction: column;
         align-items: center;
         overflow: hidden;
+    }
+
+    .popup-card.ldm {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background-color: #222;
+        box-shadow: none;
     }
 
     .popup-card::before {
@@ -60,12 +82,21 @@
         z-index: -1;
     }
 
+    .popup-card.ldm::before {
+        background: none;
+        filter: none;
+    }
+
     .popup-message {
         color: rgba(255, 255, 255, 0.9);
         font-size: 1rem;
         font-weight: 500;
         margin-bottom: 1.5rem;
         text-align: center;
+    }
+
+    .popup-backdrop.ldm .popup-message {
+        color: #fff;
     }
 
     .popup-buttons {
@@ -88,6 +119,13 @@
         transition: all 0.3s ease;
     }
 
+    .popup-btn.ldm {
+        backdrop-filter: none;
+        background-color: #333;
+        box-shadow: none;
+        color: #fff;
+    }
+
     .popup-btn::before {
         content: "";
         position: absolute;
@@ -103,9 +141,19 @@
         z-index: -1;
     }
 
+    .popup-btn.ldm::before {
+        background: none;
+        filter: none;
+    }
+
     .popup-btn:hover {
         background-color: rgba(0, 0, 0, 0.25);
         box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+    }
+
+    .popup-btn.ldm:hover {
+        background-color: #333;
+        box-shadow: none;
     }
 
     .popup-btn.confirm {
@@ -122,5 +170,15 @@
 
     .popup-btn.cancel:hover {
         box-shadow: 0 0 10px rgba(255, 0, 50, 0.3);
+    }
+
+    .popup-btn.confirm.ldm,
+    .popup-btn.cancel.ldm {
+        background-color: #333;
+    }
+
+    .popup-btn.confirm.ldm:hover,
+    .popup-btn.cancel.ldm:hover {
+        box-shadow: none;
     }
 </style>

@@ -1,24 +1,23 @@
 <script lang="ts">
     export let levels: any[] = [];
     export let namedLevels: any[] = [];
+    export let ldm = false;
 
     $: namedSet = new Set(namedLevels.map((l) => l.name));
-    console.log(namedSet);
 </script>
 
 <div class="min-h-screen max-h-screen w-85 flex">
-    <div class="flex-1 min-h-screen rounded-2xl p-0.5 radial-bg">
+    <div class="flex-1 min-h-screen rounded-2xl p-0.5" class:radial-bg={!ldm}>
         <div
-            class="w-full h-full rounded-2xl
-             bg-black/20 backdrop-blur-xl
-             border border-transparent
-             p-6 pt-10 flex flex-col text-left
-             relative overflow-hidden shadow-2xl"
+            class="w-full h-full rounded-2xl p-6 pt-10 flex flex-col text-left relative overflow-hidden shadow-2xl"
+            class:bg-layer={!ldm}
         >
             <div class="relative z-10 overflow-y-auto h-full pr-2">
                 {#each levels as level (level.name)}
                     <div
-                        class={`level-card ${namedSet.has(level.name) ? "named" : ""}`}
+                        class="level-card"
+                        class:named={namedSet.has(level.name)}
+                        class:ldm
                     >
                         <p>
                             #{level.position}
@@ -31,8 +30,8 @@
             </div>
 
             <div
-                class="absolute inset-0 rounded-2xl border-2 border-white/20
-               pointer-events-none linear-bg blur-[2px] z-20"
+                class="absolute inset-0 rounded-2xl pointer-events-none blur-[2px] z-20"
+                class:linear-bg={!ldm}
             ></div>
         </div>
     </div>
@@ -57,6 +56,11 @@
         );
     }
 
+    .bg-layer {
+        background-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+    }
+
     .level-card {
         position: relative;
         display: flex;
@@ -70,7 +74,6 @@
         background-color: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(8px);
         transition: all 0.3s ease;
-
         border: none;
         overflow: hidden;
         z-index: 0;
@@ -84,13 +87,11 @@
         right: -1px;
         bottom: -1px;
         border-radius: inherit;
-
         background: linear-gradient(
             -135deg,
             rgba(255, 255, 255, 0.103),
             rgba(255, 255, 255, 0.05)
         );
-
         filter: blur(4px);
         z-index: -1;
     }
@@ -109,5 +110,24 @@
 
     .level-card:hover {
         transform: translateY(-1px);
+    }
+
+    .level-card.ldm {
+        backdrop-filter: none;
+        background-color: #222;
+        color: #fff;
+    }
+
+    .level-card.ldm::before {
+        background: none;
+        filter: none;
+    }
+
+    .level-card.ldm:hover {
+        transform: none;
+    }
+
+    .level-card.named.ldm {
+        background-color: #0f5;
     }
 </style>

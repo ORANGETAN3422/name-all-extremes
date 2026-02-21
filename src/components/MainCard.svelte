@@ -1,13 +1,13 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fetchLevels } from "../lib/api";
-
     import Timer from "./Timer.svelte";
 
     export let levels: any[] = [];
     export let namedLevels: any[] = [];
     export let secondsElapsed: number = 0;
     export let showPopup: boolean = false;
+    export let ldm = false;
 
     let extreme = "";
     let error = "";
@@ -33,13 +33,13 @@
 
         if (matchedLevels.length === 0) {
             if (
-                namedLevels.find((l) => {
-                    let levelName = l.name
-                        .toLowerCase()
-                        .replace(/\[.*?\]|\(.*?\)/g, "")
-                        .trim();
-                    return levelName === cleanString;
-                })
+                namedLevels.find(
+                    (l) =>
+                        l.name
+                            .toLowerCase()
+                            .replace(/\[.*?\]|\(.*?\)/g, "")
+                            .trim() === cleanString,
+                )
             ) {
                 error = "Already named that extreme";
             } else {
@@ -49,9 +49,10 @@
             return;
         }
 
-        namedLevels = [...namedLevels, ...matchedLevels];
+        namedLevels = [...namedLevels, ...matchedLevels].sort(
+            (a, b) => a.position - b.position,
+        );
         levels = levels.filter((l) => !matchedLevels.includes(l));
-        namedLevels = namedLevels.sort((a, b) => a.position - b.position);
 
         extreme = "";
         error = "";
@@ -97,10 +98,8 @@
         successFlash = false;
 
         loadingLevels = true;
-
         fetchLevels().then((l) => {
             levels = l;
-            console.log(levels);
             loadingLevels = false;
         });
 
@@ -126,29 +125,25 @@
     });
 </script>
 
-<div class="min-h-screen flex bg-zinc-900">
-    <div class="flex-1 min-h-screen rounded-2xl p-0.5 radial-bg">
+<div class="min-h-screen flex" class:ldm>
+    <div class="flex-1 min-h-screen rounded-2xl p-0.5" class:radial-bg={!ldm}>
         <div
-            class="w-full h-full rounded-2xl
-             bg-black/20 backdrop-blur-xl
-             border border-transparent
-             p-6 pt-10 flex flex-col text-center
-             relative overflow-hidden shadow-2xl"
+            class="w-full h-full rounded-2xl p-6 pt-10 flex flex-col text-center relative overflow-hidden shadow-2xl"
+            class:bg-layer={!ldm}
         >
             <div
-                class="absolute inset-0 rounded-2xl border-2 border-white/20
-                  pointer-events-none
-                  linear-bg
-                  blur-[2px]"
+                class="absolute inset-0 rounded-2xl pointer-events-none blur-[2px]"
+                class:linear-bg={!ldm}
             ></div>
 
             <h1
-                class="relative text-2xl font-semibold text-white/90 tracking-tight mb-6"
+                class="relative text-2xl font-semibold tracking-tight mb-6"
+                class:text-white={!ldm}
             >
                 Name All Extremes
             </h1>
 
-            <label for="extreme" class="relative pb-2 text-white/70"
+            <label for="extreme" class="relative pb-2" class:text-white={!ldm}
                 >Enter names here</label
             >
             <input
@@ -158,19 +153,23 @@
                 placeholder="e.g. Bloodbath"
                 oninput={handleInput}
                 onkeydown={(e) => e.key === "Enter" && checkLevel()}
-                class={`fancy-input ${errorFlash ? "error" : successFlash ? "success" : ""}`}
+                class="fancy-input"
+                class:error={errorFlash && !ldm}
+                class:success={successFlash && !ldm}
             />
 
             {#if error}
                 <p class="mt-2 text-sm text-red-500 relative">{error}</p>
             {/if}
 
-            <p class="mt-4 text-xs text-white/50 relative">
+            <p class="mt-4 text-xs relative" class:text-white={!ldm}>
                 Try and list every extreme you can think of. Good Luck!
             </p>
 
             <h2
-                class={`relative text-2xl font-semibold text-white/90 tracking-tight pt-6 transition duration-300 ${successFlash ? "success" : ""}`}
+                class="relative text-2xl font-semibold tracking-tight pt-6 transition duration-300"
+                class:success={successFlash && !ldm}
+                class:text-white={!ldm}
             >
                 {#if loadingLevels}
                     ...
@@ -193,6 +192,11 @@
 </div>
 
 <style>
+    .ldm {
+        background: oklch(26.133% 0.05013 173.129 / 0.178) !important;
+        color: #fff;
+    }
+
     .radial-bg {
         background: radial-gradient(
             ellipse at top left,
@@ -201,6 +205,7 @@
             rgba(20, 20, 20, 0.7)
         );
     }
+
     .linear-bg {
         background: linear-gradient(
             135deg,
@@ -209,29 +214,20 @@
         );
     }
 
+    .bg-layer {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(12px);
+        border: 2px solid transparent;
+    }
+
     .fancy-input {
         width: 100%;
         padding: 0.75rem 1rem;
         border-radius: 0.75rem;
         background: rgba(0, 0, 0, 0.2);
-        color: rgba(255, 255, 255, 0.9);
         border: 2px solid transparent;
         outline: none;
         transition: all 0.3s ease;
-
-        background-image: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.1),
-                rgba(255, 255, 255, 0.05)
-            ),
-            linear-gradient(135deg, #00ffff0e, #00bfff11);
-        background-origin: border-box;
-        background-clip: padding-box, border-box;
-    }
-
-    .fancy-input:focus {
-        border-color: #06b6d479;
-        box-shadow: 0 0 4px rgba(0, 255, 255, 0.4);
     }
 
     .fancy-input.error {
@@ -244,14 +240,13 @@
         box-shadow: 0 0 6px rgba(5, 150, 105, 0.6);
     }
 
-    h2.success {
-        color: #10b981;
+    .fancy-input:focus {
+        border-color: #06b6d479;
+        box-shadow: 0 0 4px rgba(0, 255, 255, 0.4);
     }
 
-    .button-container {
-        display: flex;
-        justify-content: center; /* centers horizontally */
-        margin-top: 1rem;
+    h2.success {
+        color: #10b981;
     }
 
     .button-container {
