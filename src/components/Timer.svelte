@@ -25,7 +25,7 @@
         }, 1000);
     }
 
-    function stopTimer(): void {
+    export function stopTimer(): void {
         if (timer) clearInterval(timer);
         timer = undefined;
     }

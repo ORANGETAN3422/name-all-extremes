@@ -7,11 +7,14 @@
     export let levels: any[] = [];
     export let namedLevels: any[] = [];
     export let secondsElapsed: number = 0;
+    export let showPopup: boolean = false;
 
     let extreme = "";
     let error = "";
     let errorFlash = false;
     let successFlash = false;
+    let loadingLevels = false;
+    let timerRef: any;
 
     function checkLevel() {
         let cleanString = extreme
@@ -57,6 +60,10 @@
         setTimeout(() => (successFlash = false), 300);
 
         saveState();
+
+        if (levels.length === 0) {
+            timerRef?.stopTimer();
+        }
     }
 
     function handleInput() {
@@ -72,7 +79,11 @@
         localStorage.setItem("timer", JSON.stringify(secondsElapsed));
     }
 
-    function restartGame() {
+    function requestRestart() {
+        showPopup = true;
+    }
+
+    export function restartGame() {
         localStorage.removeItem("levels");
         localStorage.removeItem("namedLevels");
         localStorage.removeItem("timer");
@@ -85,10 +96,15 @@
         errorFlash = false;
         successFlash = false;
 
+        loadingLevels = true;
+
         fetchLevels().then((l) => {
             levels = l;
             console.log(levels);
+            loadingLevels = false;
         });
+
+        showPopup = false;
     }
 
     onMount(() => {
@@ -96,9 +112,17 @@
         const savedNamedLevels = localStorage.getItem("namedLevels");
         const savedTimer = localStorage.getItem("timer");
 
-        if (savedLevels) levels = JSON.parse(savedLevels);
-        if (savedNamedLevels) namedLevels = JSON.parse(savedNamedLevels);
-        if (savedTimer) secondsElapsed = JSON.parse(savedTimer);
+        if (savedLevels && savedNamedLevels) {
+            levels = JSON.parse(savedLevels);
+            namedLevels = JSON.parse(savedNamedLevels);
+            if (savedTimer) secondsElapsed = JSON.parse(savedTimer);
+        } else {
+            loadingLevels = true;
+            fetchLevels().then((l) => {
+                levels = l;
+                loadingLevels = false;
+            });
+        }
     });
 </script>
 
@@ -148,13 +172,17 @@
             <h2
                 class={`relative text-2xl font-semibold text-white/90 tracking-tight pt-6 transition duration-300 ${successFlash ? "success" : ""}`}
             >
-                {namedLevels.length} / {levels.length} Named
+                {#if loadingLevels}
+                    ...
+                {:else}
+                    {namedLevels.length} / {levels.length} Named
+                {/if}
             </h2>
 
-            <Timer bind:secondsElapsed />
+            <Timer bind:secondsElapsed bind:this={timerRef} />
 
             <div class="button-container">
-                <button class="fancy-button restart" onclick={restartGame}>
+                <button class="fancy-button restart" onclick={requestRestart}>
                     Restart
                 </button>
             </div>
@@ -267,7 +295,6 @@
     }
 
     .fancy-button:hover {
-        background: rgba(255, 0, 50, 0.25);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 10px rgba(255, 0, 50, 0.3);
     }
 </style>

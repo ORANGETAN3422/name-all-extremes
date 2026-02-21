@@ -1,16 +1,22 @@
 <script lang="ts">
-  import StartCard from "./components/MainCard.svelte";
+  import MainCard from "./components/MainCard.svelte";
   import NamedCard from "./components/NamedCard.svelte";
-
-  import { fetchLevels } from "./lib/api";
+  import Popup from "./components/Popup.svelte";
 
   let levels: any[] = [];
   let namedLevels: any[] = [];
 
-  fetchLevels().then((l) => {
-    levels = l;
-    console.log(levels);
-  });
+  let showPopup: boolean = false;
+  let mainCardRef: any;
+
+  function handleRestart() {
+    if (mainCardRef && mainCardRef.restartGame) mainCardRef.restartGame();
+    showPopup = false;
+  }
+
+  function handleCancel() {
+    showPopup = false;
+  }
 </script>
 
 <div class="min-h-screen flex bg-zinc-900">
@@ -19,6 +25,19 @@
   </div>
 
   <div class="flex-1">
-    <StartCard {levels} bind:namedLevels />
+    <MainCard
+      bind:this={mainCardRef}
+      bind:levels
+      bind:namedLevels
+      bind:showPopup
+    />
   </div>
 </div>
+
+{#if showPopup}
+  <Popup
+    message="Are you sure you want to delete restart?"
+    onConfirm={handleRestart}
+    onCancel={handleCancel}
+  />
+{/if}
