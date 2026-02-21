@@ -17,52 +17,65 @@
     let timerRef: any;
 
     function checkLevel() {
-        let cleanString = extreme
+        const cleanInput = extreme
             .toLowerCase()
             .trim()
             .replace(/\[.*?\]|\(.*?\)/g, "")
             .trim();
 
         const matchedLevels = levels.filter((l) => {
-            let levelName = l.name
+            const cleanLevelName = l.name
                 .toLowerCase()
                 .replace(/\[.*?\]|\(.*?\)/g, "")
                 .trim();
-            return levelName === cleanString;
+            return cleanLevelName === cleanInput;
         });
 
         if (matchedLevels.length === 0) {
-            if (
-                namedLevels.find(
-                    (l) =>
-                        l.name
-                            .toLowerCase()
-                            .replace(/\[.*?\]|\(.*?\)/g, "")
-                            .trim() === cleanString,
-                )
-            ) {
-                error = "Already named that extreme";
-            } else {
-                error = "That extreme doesn't exist";
-            }
+            const alreadyNamed = namedLevels.some((l) => {
+                const cleanNamed = l.name
+                    .toLowerCase()
+                    .replace(/\[.*?\]|\(.*?\)/g, "")
+                    .trim();
+                return cleanNamed === cleanInput;
+            });
+
+            error = alreadyNamed
+                ? "Already named that extreme"
+                : "That extreme doesn't exist";
             errorFlash = true;
             return;
         }
 
-        namedLevels = [...namedLevels, ...matchedLevels].sort(
+        const newNamedLevels = matchedLevels.filter(
+            (l) =>
+                !namedLevels.some(
+                    (n) =>
+                        n.name.toLowerCase().trim() ===
+                        l.name.toLowerCase().trim(),
+                ),
+        );
+
+        if (newNamedLevels.length === 0) {
+            error = "Already named that extreme";
+            errorFlash = true;
+            return;
+        }
+
+        namedLevels = [...namedLevels, ...newNamedLevels].sort(
             (a, b) => a.position - b.position,
         );
-        levels = levels.filter((l) => !matchedLevels.includes(l));
 
         extreme = "";
         error = "";
         errorFlash = false;
         successFlash = true;
+
         setTimeout(() => (successFlash = false), 300);
 
         saveState();
 
-        if (levels.length === 0) {
+        if (levels.length === namedLevels.length) {
             timerRef?.stopTimer();
         }
     }
@@ -225,7 +238,7 @@
         padding: 0.75rem 1rem;
         border-radius: 0.75rem;
         background: rgba(0, 0, 0, 0.2);
-        border: 2px solid transparent;
+        border: 2px solid rgba(255, 255, 255, 0.034);
         outline: none;
         transition: all 0.3s ease;
     }

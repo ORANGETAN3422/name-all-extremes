@@ -4,6 +4,12 @@
     export let ldm = false;
 
     $: namedSet = new Set(namedLevels.map((l) => l.name));
+
+    let showNamedOnly = false;
+
+    $: displayedLevels = showNamedOnly
+        ? levels.filter((level) => namedSet.has(level.name))
+        : levels;
 </script>
 
 <div class="min-h-screen max-h-screen w-85 flex">
@@ -12,8 +18,15 @@
             class="w-full h-full rounded-2xl p-6 pt-10 flex flex-col text-left relative overflow-hidden shadow-2xl"
             class:bg-layer={!ldm}
         >
+            <button
+                class="glass-btn mb-4 self-start"
+                on:click={() => (showNamedOnly = !showNamedOnly)}
+            >
+                {showNamedOnly ? "Show All" : "Show Named"}
+            </button>
+
             <div class="relative z-10 overflow-y-auto h-full pr-2">
-                {#each levels as level (level.name)}
+                {#each displayedLevels as level (level.name)}
                     <div
                         class="level-card"
                         class:named={namedSet.has(level.name)}
@@ -129,5 +142,45 @@
 
     .level-card.named.ldm {
         background-color: #0f5;
+    }
+
+    .glass-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-btn::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        right: -1px;
+        bottom: -1px;
+        border-radius: inherit;
+        background: linear-gradient(
+            -135deg,
+            rgba(255, 255, 255, 0.103),
+            rgba(255, 255, 255, 0.05)
+        );
+        filter: blur(4px);
+        z-index: -1;
+    }
+
+    .glass-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .glass-btn:active {
+        transform: translateY(0);
     }
 </style>
