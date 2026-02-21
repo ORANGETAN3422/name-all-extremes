@@ -1,5 +1,5 @@
 <script lang="ts">
-  import StartCard from "./components/StartCard.svelte";
+  import StartCard from "./components/MainCard.svelte";
   import NamedCard from "./components/NamedCard.svelte";
 
   import { fetchLevels } from "./lib/api";
