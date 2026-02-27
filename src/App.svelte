@@ -39,7 +39,7 @@
     requestAnimationFrame(monitorFPS);
   }
 
-  requestAnimationFrame(monitorFPS);
+  //requestAnimationFrame(monitorFPS);
 
   function toggleLDM() {
     manualLdm = !manualLdm;

@@ -141,7 +141,7 @@
     }
 
     .level-card.named.ldm {
-        background-color: #0f5;
+        background-color: rgb(0, 75, 25);
     }
 
     .glass-btn {
